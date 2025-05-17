@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Image Upload and Compress</title>
   <style>
     body {
@@ -26,16 +26,6 @@
     h2 {
       color: #333;
     }
-    input[type="file"] {
-      margin: 20px 0;
-    }
-    img {
-      max-width: 100%;
-      margin-top: 20px;
-    }
-    .button-container {
-      margin-top: 20px;
-    }
     .download-btn {
       background-color: #007BFF;
       color: white;
@@ -49,76 +39,83 @@
     .download-btn:hover {
       background-color: #0056b3;
     }
+    #outputImage img {
+      max-width: 100%;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Upload and Compress Image</h2>
 
-<div class="container">
-  <h2>Upload and Compress Image</h2>
-  <input type="file" id="imageInput" accept="image/*">
-  <br>
-  <canvas id="canvas" style="display: none;"></canvas>
-  <div id="outputImage"></div>
-  <div class="button-container" id="downloadBtnContainer" style="display: none;">
-    <a id="downloadBtn" class="download-btn" href="#" download>Download Compressed Image</a>
+    <!-- Custom Upload Button -->
+    <button id="uploadBtn" class="download-btn">Upload Image</button>
+    <input type="file" id="imageInput" accept="image/*" style="display:none;" />
+
+    <canvas id="canvas" style="display: none;"></canvas>
+    <div id="outputImage"></div>
+
+    <div class="button-container" id="downloadBtnContainer" style="display: none;">
+      <a id="downloadBtn" class="download-btn" href="#" download="compressed-image.jpg">Download Compressed Image</a>
+    </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pica/8.1.0/pica.min.js"></script>
-<script>
-  const imageInput = document.getElementById('imageInput');
-  const outputImage = document.getElementById('outputImage');
-  const canvas = document.getElementById('canvas');
-  const downloadBtnContainer = document.getElementById('downloadBtnContainer');
-  const downloadBtn = document.getElementById('downloadBtn');
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/8.1.0/pica.min.js"></script>
+  <script>
+    const uploadBtn = document.getElementById('uploadBtn');
+    const imageInput = document.getElementById('imageInput');
+    const outputImage = document.getElementById('outputImage');
+    const canvas = document.getElementById('canvas');
+    const downloadBtnContainer = document.getElementById('downloadBtnContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-  // Function to compress image
-  function compressImage(file) {
-    const img = new Image();
-    const reader = new FileReader();
+    uploadBtn.addEventListener('click', () => {
+      imageInput.click();
+    });
 
-    reader.onload = function (e) {
-      img.onload = function () {
-        const scaleFactor = 1000 / Math.max(img.width, img.height);
-        const width = img.width * scaleFactor;
-        const height = img.height * scaleFactor;
+    function compressImage(file) {
+      const img = new Image();
+      const reader = new FileReader();
 
-        canvas.width = width;
-        canvas.height = height;
+      reader.onload = function (e) {
+        img.onload = function () {
+          const scaleFactor = 1000 / Math.max(img.width, img.height);
+          const width = img.width * scaleFactor;
+          const height = img.height * scaleFactor;
 
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+          canvas.width = width;
+          canvas.height = height;
 
-        // Convert to base64
-        canvas.toBlob(function (blob) {
-          if (blob.size < 1048576) {  // Check if size is below 1MB (1048576 bytes)
-            const compressedImageURL = URL.createObjectURL(blob);
-            displayImage(compressedImageURL, blob);
-          } else {
-            alert('The image is still too large. Try uploading a smaller image.');
-          }
-        }, 'image/jpeg', 0.7); // JPEG compression
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(function (blob) {
+            if (blob.size < 1048576) {  // less than 1MB
+              const compressedImageURL = URL.createObjectURL(blob);
+              displayImage(compressedImageURL, blob);
+            } else {
+              alert('The image is still too large. Try uploading a smaller image.');
+            }
+          }, 'image/jpeg', 0.7);
+        };
+        img.src = e.target.result;
       };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  // Function to display the image and enable download
-  function displayImage(imageURL, blob) {
-    outputImage.innerHTML = `<img src="${imageURL}" alt="Compressed Image">`;
-    downloadBtnContainer.style.display = 'block';
-    downloadBtn.href = imageURL;
-  }
-
-  // Event listener for file upload
-  imageInput.addEventListener('change', function () {
-    const file = imageInput.files[0];
-    if (file) {
-      compressImage(file);
+      reader.readAsDataURL(file);
     }
-  });
-</script>
 
+    function displayImage(imageURL, blob) {
+      outputImage.innerHTML = `<img src="${imageURL}" alt="Compressed Image">`;
+      downloadBtnContainer.style.display = 'block';
+      downloadBtn.href = imageURL;
+    }
+
+    imageInput.addEventListener('change', function () {
+      const file = imageInput.files[0];
+      if (file) {
+        compressImage(file);
+      }
+    });
+  </script>
 </body>
 </html>
